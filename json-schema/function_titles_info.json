@@ -1,0 +1,41 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+
+    "additionalProperties": {
+        "title": "titles-n-descriptions of one function",
+        "type": "object",
+        "additionalProperties": false,
+
+        "properties": {
+            "title": {"type": "string"},
+            "description": {"type": "string"},
+
+            "inputs": {
+                "title": "titles-n-descriptions of each function argument",
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "title": {"type": "string"},
+                        "description": {"type": "string"}
+                    }
+                }
+            },
+
+            "outputs": {
+                "title": "titles-n-descriptions of each function output value",
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "title": {"type": "string"},
+                        "description": {"type": "string"}
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,86 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+        "address": {
+            "type": "string",
+            "pattern": "^(?:0[Xx])?[0-9a-fA-F]{40}$"
+        },
+
+        "addressArray": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/address" }
+        },
+
+        "unixTime": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+        },
+
+        "addressMappingEntry": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": [
+                {
+                    "$ref": "#/definitions/address"
+                },
+                {}
+            ]
+        },
+
+        "addressMapping": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/addressMappingEntry" }
+        },
+
+        "uintMappingEntry": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": [
+                { "$ref": "#/definitions/uint" },
+                {}
+            ]
+        },
+
+        "uintMapping": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/uintMappingEntry" }
+        },
+
+        "uint256": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 78,
+            "pattern": "^[0-9]+$"
+        },
+
+        "uint": {
+            "$ref": "#/definitions/uint256"
+        },
+
+        "bytes32": {
+            "type": "string",
+            "pattern": "^(?:0[Xx])?[0-9a-fA-F]{64}$"
+        },
+
+        "uint8": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+        },
+
+        "uint16": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535
+        },
+
+        "uint32": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+        }
+    }
+}
