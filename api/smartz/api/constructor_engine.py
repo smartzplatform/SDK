@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-#   constructor_engine.api
+#   smartz.api.constructor_engine
 #
 
 from abc import ABCMeta, abstractmethod
