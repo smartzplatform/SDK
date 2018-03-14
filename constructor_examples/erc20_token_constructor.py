@@ -1,5 +1,5 @@
 
-from constructor_engine.api import ConstructorInstance
+from smartz.api.constructor_engine import ConstructorInstance
 from smartz.eth.contracts import make_generic_function_spec, merge_function_titles2specs
 
 
@@ -19,20 +19,20 @@ class Constructor(ConstructorInstance):
             "properties": {
                 "name": {
                     "title": "Name of a token",
-                    "description": "Token human-friendly name (3..100 characters, letters and spaces only)",
+                    "description": "Token human-friendly name (3..100 characters, letters, digits and spaces only)",
                     "type": "string",
                     "minLength": 3,
                     "maxLength": 100,
-                    "pattern": "^[a-zA-Z ]+$"
+                    "pattern": "^[a-zA-Z0-9 ]+$"
                 },
 
                 "symbol": {
                     "title": "Token Symbol",
-                    "description": "Token ticker (2..10 characters, capital letters only)",
+                    "description": "Token ticker (2..10 characters, letters and digits only)",
                     "type": "string",
                     "minLength": 2,
                     "maxLength": 10,
-                    "pattern": "^[A-Z]+$"
+                    "pattern": "^[a-zA-Z0-9]+$"
                 },
 
                 "decimals": {
@@ -89,6 +89,7 @@ class Constructor(ConstructorInstance):
         ui_schema = {}
 
         return {
+            "result": "success",
             "schema": json_schema,
             "ui_schema": ui_schema
         }
@@ -134,16 +135,16 @@ class Constructor(ConstructorInstance):
 
         source = self.__class__._TEMPLATE \
             .replace('%name%', fields['name']) \
-            .replace('%symbol%', fields['symbol']) \
+            .replace('%symbol%', fields['symbol'].upper()) \
             .replace('%decimals%', str(fields['decimals'])) \
             .replace('%parents_code%', parents_code) \
             .replace('%constructors_code%', constructors_code) \
             .replace('%constructor_inner_code%', constructor_inner_code)
 
         return {
-            'result': "success",
-            'source': source,
-            'contract_name': "Token"
+            "result": "success",
+            "source": source,
+            "contract_name": "Token"
         }
 
     def post_construct(self, fields, abi_array):
@@ -319,8 +320,8 @@ class Constructor(ConstructorInstance):
         }
 
         return {
+            "result": "success",
             'function_specs': merge_function_titles2specs(make_generic_function_spec(abi_array), function_titles),
-
             'dashboard_functions': ['symbol', 'totalSupply']
         }
 

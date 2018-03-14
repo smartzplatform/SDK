@@ -1,5 +1,5 @@
 
-from constructor_engine.api import ConstructorInstance
+from smartz.api.constructor_engine import ConstructorInstance
 from smartz.eth.contracts import make_generic_function_spec, merge_function_titles2specs
 
 
@@ -49,6 +49,7 @@ class Constructor(ConstructorInstance):
         }
 
         return {
+            "result": "success",
             'schema': json_schema,
             'ui_schema': ui_schema
         }
@@ -178,8 +179,8 @@ class Constructor(ConstructorInstance):
         }
 
         return {
+            "result": "success",
             'function_specs': merge_function_titles2specs(make_generic_function_spec(abi_array), function_titles),
-
             'dashboard_functions': ['m_numOwners', 'm_multiOwnedRequired']
         }
 
