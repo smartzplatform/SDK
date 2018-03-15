@@ -15,7 +15,8 @@ class Constructor(ConstructorInstance):
 
             "properties": {
                 "name": {
-                    "title": "Ballot name",
+                    "title": "Ballot topic",
+                    "description": "Name or description of the vote (string of 200 chars max)",
                     "type": "string",
                     "minLength": 3,
                     "maxLength": 200,
@@ -24,6 +25,7 @@ class Constructor(ConstructorInstance):
 
                 "variants": {
                     "title": "Variants",
+                    "description": "List of answer variants. One account can vote only for one variant",
                     "type": "array",
                     "minItems": 1,
                     "maxItems": 100,
@@ -83,10 +85,12 @@ class Constructor(ConstructorInstance):
         function_titles = {
             'ballotName': {
                 'title': 'Ballot topic',
+                'description': 'Name or description of the vote'
             },
 
             'variants': {
-                'title': 'Get variant name by ID',
+                'title': 'View variant',
+                'description': 'Get variant name by ID',
                 'inputs': [{
                     'title': 'Variant ID',
                 }]
@@ -94,13 +98,14 @@ class Constructor(ConstructorInstance):
 
             'isVoted': {
                 'title': 'Has address voted?',
+                'description': 'Check if given address has voted',
                 'inputs': [{
                     'title': 'Address to check',
                 }]
             },
 
             'vote': {
-                'title': 'Vote',
+                'title': 'Vote by ID',
                 'description': 'Vote by variant ID',
                 'inputs': [{
                     'title': 'Variant ID',
@@ -108,7 +113,7 @@ class Constructor(ConstructorInstance):
             },
 
             'voteByName': {
-                'title': 'Vote',
+                'title': 'Vote by name',
                 'description': 'Vote by variant name',
                 'inputs': [{
                     'title': 'Variant name',
@@ -134,14 +139,17 @@ class Constructor(ConstructorInstance):
 
             'getWinningVariantId': {
                 'title': 'Winning variant ID',
+                'description': 'ID of the variant with the most votes'
             },
 
             'getWinningVariantName': {
                 'title': 'Winning variant name',
+                'description': 'The name of the variant with the most votes'
             },
 
             'getWinningVariantVotesCount': {
                 'title': 'Winning variant votes count',
+                'description': 'Count of votes of the variant with the most votes'
             },
         }
 
@@ -163,7 +171,7 @@ contract SimpleBallot {
 
     string public ballotName;
 
-    string[] variants;
+    string[] public variants;
 
     mapping(uint=>uint) votesCount;
     mapping(address=>bool) public isVoted;
