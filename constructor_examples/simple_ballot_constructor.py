@@ -186,6 +186,8 @@ contract SimpleBallot {
         %variants_code%
 
         assert(variants.length <= 100);
+        
+        %payment_code%
     }
 
     modifier hasNotVoted() {

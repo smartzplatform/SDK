@@ -61,6 +61,10 @@
                     "description": "ABI name (dont show to user)",
                     "type": "string"
                 },
+                "sorting_order": {
+                    "description": "Sorting order in dashboard",
+                    "type": "integer"
+                },
                 "constant": {
                     "type": "boolean"
                 },

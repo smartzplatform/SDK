@@ -10,6 +10,7 @@
         "properties": {
             "title": {"type": "string"},
             "description": {"type": "string"},
+            "sorting_order": {"type": "integer"},
 
             "inputs": {
                 "title": "titles-n-descriptions of each function argument",
