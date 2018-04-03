@@ -65,6 +65,11 @@
             "pattern": "^(?:0[Xx])?[0-9a-fA-F]{64}$"
         },
 
+        "bytes": {
+            "type": "string",
+            "pattern": "^(?:0[Xx])?[0-9a-fA-F]+$"
+        },
+
         "uint8": {
             "type": "integer",
             "minimum": 0,
@@ -81,6 +86,19 @@
             "type": "integer",
             "minimum": 0,
             "maximum": 4294967295
+        },
+
+        "uint64": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 18446744073709552000
+        },
+
+        "uint128": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 39,
+            "pattern": "^[0-9]+$"
         }
     }
 }
