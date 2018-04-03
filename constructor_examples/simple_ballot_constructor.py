@@ -20,7 +20,7 @@ class Constructor(ConstructorInstance):
                     "type": "string",
                     "minLength": 3,
                     "maxLength": 200,
-                    "pattern": "^[a-zA-Z0-9,\. ]+$"
+                    "pattern": "^[a-zA-Z0-9,\.\? ]+$"
                 },
 
                 "variants": {
@@ -30,19 +30,11 @@ class Constructor(ConstructorInstance):
                     "minItems": 1,
                     "maxItems": 100,
                     "items": {
-                        "type": "object",
-                        "required": ["variant"],
-                        "additionalProperties": False,
-
-                        "properties": {
-                             "variant": {
-                                "title": "Variant",
-                                "type": "string",
-                                "minLength": 1,
-                                "maxLength": 200,
-                                "pattern": "^[a-zA-Z0-9,\. ]+$"
-                            },
-                        }
+                        "title": "Variant",
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200,
+                        "pattern": "^[a-zA-Z0-9,\.\? ]+$"
                     }
                 }
 
@@ -61,12 +53,10 @@ class Constructor(ConstructorInstance):
         variants_code = ''
 
         for variant_id, variant in enumerate(fields['variants']):
-            variant_descr = variant['variant']
-
             variants_code += """
                 variants.push('{variant_descr}');variantIds[sha256('{variant_descr}')] = {variant_id};
             """.format(
-                variant_descr=variant_descr,
+                variant_descr=variant,
                 variant_id=variant_id+1
             )
 
