@@ -107,6 +107,27 @@ class Constructor(ConstructorInstance):
                 }]
             },
 
+            'sendTokens': {
+                'title': 'Send tokens',
+                'description': 'Send some amount of tokens',
+                'inputs': [{
+                    'title': 'Token smart contract address',
+                },{
+                    'title': 'Destination address',
+                }, {
+                    'title': 'Amount in token wei',
+                    'description': 'Amount must be specified in the smallest units: token wei'
+                }]
+            },
+
+            'tokenBalance': {
+                'title': 'Get token balance',
+                'description': 'Token balance in token wei',
+                'inputs': [{
+                    'title': 'Token smart contract address',
+                }]
+            },
+
             'm_multiOwnedRequired': {
                 'title': 'Quorum requirement',
                 'description': 'Number of signatures required to perform actions on this wallet',
@@ -602,12 +623,25 @@ contract multiowned {
 }
 
 /**
+ * @title ERC20Basic
+ * @dev Simpler version of ERC20 interface
+ * @dev see https://github.com/ethereum/EIPs/issues/179
+ */
+contract ERC20Basic {
+  function totalSupply() public view returns (uint256);
+  function balanceOf(address who) public view returns (uint256);
+  function transfer(address to, uint256 value) public returns (bool);
+  event Transfer(address indexed from, address indexed to, uint256 value);
+}
+
+/**
  * @title Basic demonstration of multi-owned entity.
  */
 contract SimpleMultiSigWallet is multiowned {
 
     event Deposit(address indexed sender, uint value);
     event EtherSent(address indexed to, uint value);
+    event TokensSent(address token, address indexed to, uint value);
 
     function SimpleMultiSigWallet()
         multiowned()
@@ -633,10 +667,29 @@ contract SimpleMultiSigWallet is multiowned {
         external
         onlymanyowners(keccak256(msg.data))
     {
-        require(0 != to);
+        require(address(0) != to);
         require(value > 0 && this.balance >= value);
         to.transfer(value);
         EtherSent(to, value);
+    }
+    
+    function sendTokens(address token, address to, uint value)
+        external
+        onlymanyowners(keccak256(msg.data))
+        returns (bool)
+    {
+        require(address(0) != to);
+        
+        if (ERC20Basic(token).transfer(to, value)) {
+            TokensSent(token, to, value);
+            return true;
+        }
+        
+        return false;
+    }
+    
+    function tokenBalance(address token) external view returns (uint256) {
+        return ERC20Basic(token).balanceOf(this);
     }
 }
 
