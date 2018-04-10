@@ -1,6 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
+    "description": "Moved to json-schema/constructor.json (ETHFunctionAdditionalDescriptions). Will be removed after 01.05.2018",
 
     "additionalProperties": {
         "title": "titles-n-descriptions of one function",

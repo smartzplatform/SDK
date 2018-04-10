@@ -17,6 +17,11 @@
             "maximum": 2147483647
         },
 
+        "fileHash": {
+            "type": "string",
+            "pattern": "^0x[0-9a-fA-F]{64}$"
+        },
+
         "addressMappingEntry": {
             "type": "array",
             "minItems": 2,

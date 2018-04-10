@@ -2,6 +2,7 @@
 #
 #   smartz.eth.contracts
 #
+# Functions used for contracts api v1. Will be removed after 01.05.2018
 
 
 def make_generic_function_spec(abi_array):

@@ -1,16 +1,10 @@
-# -*- coding: utf-8 -*-
-#
-#   smartz.api.constructor_engine
-#
-
-from abc import ABCMeta, abstractmethod
+# Versions of constructor api
 
 
-class ConstructorInstance(metaclass=ABCMeta):
-    """
-    Constructor interface (v1).
-    """
+## version 1
 
+- Method `get_version` added to constructor interface:
+```python
     @abstractmethod
     def get_version(self):
         """
@@ -25,6 +19,36 @@ class ConstructorInstance(metaclass=ABCMeta):
         or throws exception.
         """
         raise NotImplementedError()
+```
+- Changed format of `function_specs` in `post_construct`. Now it returns `ETHFunctionAdditionalDescriptions` (see json-schema/constructor.json):
+```python
+    @abstractmethod
+    def post_construct(self, fields, abi_array):
+        """
+        Called after compiling constructed source to get extra contract info.
+
+        :param fields: fields data provided during construct
+        :param abi_array: Ethereum ABI of compiled contract
+        :return: {
+            "result": "success",
+            "function_specs": ETHFunctionAdditionalDescriptions (see json-schema/constructor.json),
+            "dashboard_functions": list of function names
+        }
+
+        Should not throw.
+        """
+        raise NotImplementedError()
+```
+
+
+## version 0 (deprecated, would not be supported after 01.05.2018)
+
+- Constructor must implement constructor interface: `smartz.api.constructor_engine.ConstructorInstance`:
+```python
+class ConstructorInstance(metaclass=ABCMeta):
+    """
+    Constructor interface.
+    """
 
     @abstractmethod
     def get_params(self):
@@ -78,10 +102,11 @@ class ConstructorInstance(metaclass=ABCMeta):
         :param abi_array: Ethereum ABI of compiled contract
         :return: {
             "result": "success",
-            "function_specs": ETHFunctionAdditionalDescriptions (see json-schema/constructor.json),
+            "function_specs": list of ETHFunctionSpec (see json-schema/constructor.json),
             "dashboard_functions": list of function names
         }
 
         Should not throw.
         """
         raise NotImplementedError()
+```

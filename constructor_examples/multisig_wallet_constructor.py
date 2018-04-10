@@ -1,11 +1,15 @@
-
 from smartz.api.constructor_engine import ConstructorInstance
-from smartz.eth.contracts import make_generic_function_spec, merge_function_titles2specs
 
 
 class Constructor(ConstructorInstance):
 
     MAX_OWNERS = 250
+
+    def get_version(self):
+        return {
+            "result": "success",
+            "version": 1
+        }
 
     def get_params(self):
         json_schema = {
@@ -201,7 +205,7 @@ class Constructor(ConstructorInstance):
 
         return {
             "result": "success",
-            'function_specs': merge_function_titles2specs(make_generic_function_spec(abi_array), function_titles),
+            'function_specs': function_titles,
             'dashboard_functions': ['m_numOwners', 'm_multiOwnedRequired']
         }
 
