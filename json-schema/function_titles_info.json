@@ -21,7 +21,12 @@
                     "additionalProperties": false,
                     "properties": {
                         "title": {"type": "string"},
-                        "description": {"type": "string"}
+                        "description": {"type": "string"},
+                        "ui:widget": {
+                            "description": "Widget for input",
+                            "type": "string",
+                            "enum": ["stringHash", "fileHash"]
+                        }
                     }
                 }
             },

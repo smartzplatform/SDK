@@ -138,6 +138,19 @@
                 "title": {"type": "string"},
                 "description": {"type": "string"},
                 "sorting_order": {"type": "integer"},
+                "ui:widget": {
+                    "description": "Widget for function result",
+                    "type": "string",
+                    "enum": ["unixTime", "ethCount", "enum", "url"]
+                },
+                "ui:widget_options": {
+                    "description": "Options of widget for function result",
+                    "type": "object",
+                    "properties": {
+                        "format": { "type": "string" },
+                        "enum": { "type": "array", "items": { "type": "string" } }
+                    }
+                },
 
                 "inputs": {
                     "title": "titles-n-descriptions of each function argument",
@@ -147,7 +160,12 @@
                         "additionalProperties": false,
                         "properties": {
                             "title": {"type": "string"},
-                            "description": {"type": "string"}
+                            "description": {"type": "string"},
+                            "ui:widget": {
+                                "description": "Widget for input",
+                                "type": "string",
+                                "enum": ["stringHash", "fileHash"]
+                            }
                         }
                     }
                 },
