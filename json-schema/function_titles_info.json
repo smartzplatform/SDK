@@ -25,7 +25,7 @@
                         "ui:widget": {
                             "description": "Widget for input",
                             "type": "string",
-                            "enum": ["stringHash", "fileHash"]
+                            "enum": ["stringHash", "fileHash", "unixTime"]
                         }
                     }
                 }
