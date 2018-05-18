@@ -15,23 +15,42 @@ class Constructor(ConstructorInstance):
         json_schema = {
             "type": "object",
             "required": [
-                "description", "price", "cancellationFee", "rentDateStart", "rentDateEnd", "noCancelPeriod", "acceptObjectPeriod"
+                "address", "price", "cancellationFee", "rentDateStart", "rentDateEnd", "noCancelPeriod", "acceptObjectPeriod"
             ],
             "additionalProperties": False,
 
             "properties": {
+                "address": {
+                    "title": "Object address",
+                    "description": "Including such details as: city, street, house, apartment",
+                    "type": "string",
+                    "minLength": 10,
+                    "maxLength": 300,
+                    "pattern": '^[a-zA-Z0-9а-яА-ЯёЁ,\.\?\/\!\?\@\#\$\%\^\&\*\(\)\-\+\[\]\{\}\"\:\;\<\> ]+$'
+                },
+
                 "description": {
                     "title": "Object description",
-                    "description": "Object description (including address, object quality, etc)",
+                    "description": "Additional object description (quality of the object, tips on how to get there, etc)",
                     "type": "string",
                     "minLength": 20,
-                    "maxLength": 300,
-                    "pattern": "^[a-zA-Z0-9,\.\? ]+$"
+                    "maxLength": 500,
+                    "pattern": '^[a-zA-Z0-9а-яА-ЯёЁ,\.\?\/\!\?\@\#\$\%\^\&\*\(\)\-\+\[\]\{\}\"\:\;\<\> ]+$'
                 },
+
+                "rentDateStart": {
+                    "title": "Start rent time",
+                    "$ref": "#/definitions/unixTime"
+                },
+                "rentDateEnd": {
+                    "title": "End rent time",
+                    "$ref": "#/definitions/unixTime"
+                },
+
 
                 "price": {
                     "title": "Price",
-                    "description": "Price for rent of object for while rent period",
+                    "description": "Price in ether for rent of object for whole rent period",
                     "$ref": "#/definitions/ethCountPositive"
                 },
                 "fileUrl": {
@@ -44,21 +63,9 @@ class Constructor(ConstructorInstance):
                 "fileHash": {
                     "title": "Hash of file above",
                     "description": "Just upload file, hash will be calculated automatically",
-                    "$ref": "#/definitions/fileHash"
+                    "$ref": "#/definitions/hash"
                 },
-                "cancellationFee": {
-                    "title": "Cancellation fee",
-                    "description": "For canceling after \"no cancel\" time",
-                    "$ref": "#/definitions/ethCount"
-                },
-                "rentDateStart": {
-                    "title": "Start rent time",
-                    "$ref": "#/definitions/unixTime"
-                },
-                "rentDateEnd": {
-                    "title": "End rent time",
-                    "$ref": "#/definitions/unixTime"
-                },
+
                 "noCancelPeriod": {
                     "title": "No cancel time (in hours)",
                     "description": "After this time before start rent time cancellation fee would be collected from the customer",
@@ -68,6 +75,12 @@ class Constructor(ConstructorInstance):
                     "title": "Accept object time (in hours)",
                     "description": "Time for customer after start rent time to accept object",
                     "type": "integer"
+                },
+
+                "cancellationFee": {
+                    "title": "Cancellation fee",
+                    "description": "For canceling after \"no cancel\" time. In ether",
+                    "$ref": "#/definitions/ethCount"
                 },
 
             }
@@ -96,43 +109,18 @@ class Constructor(ConstructorInstance):
         errors = {}
 
         if fields['price'] <= fields['cancellationFee']:
-            # todo waiting for front
-            return {
-                "result": "error",
-                "error_descr": 'Price must be greater than cancellation fee'
-            }
             errors['price'] = 'Price must be greater than cancellation fee'
 
         if fields['rentDateStart'] < time.time():
-            # todo waiting for front
-            return {
-                "result": "error",
-                "error_descr": 'Start rent time must be in future'
-            }
             errors['rentDateStart'] = 'Start rent time must be in future'
 
         if fields['rentDateStart'] >= fields['rentDateEnd']:
-            # todo waiting for front
-            return {
-                "result": "error",
-                "error_descr": 'Start rent time must be less than end rent time'
-            }
             errors['rentDateStart'] = 'Start rent time must be less than end rent time'
 
         if fields['rentDateStart']+fields['acceptObjectPeriod']*60*60 >= fields['rentDateEnd']:
-            # todo waiting for front
-            return {
-                "result": "error",
-                "error_descr": 'Accept object time must be less than rent period'
-            }
             errors['acceptObjectPeriod'] = 'Accept object time must be less than rent period'
 
         if fields['rentDateStart'] <= fields['noCancelPeriod'] * 60*60:
-            # todo waiting for front
-            return {
-                "result": "error",
-                "error_descr": '"No cancel" time must be less than start rent date'
-            }
             errors['rentDateStart'] = '"No cancel" time must be less than start rent date'
 
         if errors:
@@ -142,6 +130,7 @@ class Constructor(ConstructorInstance):
             }
 
         source = self.__class__._TEMPLATE \
+            .replace('%_address%', fields['address']) \
             .replace('%_description%', fields['description']) \
             .replace('%_price%', fields['price']) \
             .replace('%_fileUrl%', fields['fileUrl'] if 'fileUrl' in fields else '') \
@@ -167,21 +156,26 @@ class Constructor(ConstructorInstance):
                 'sorting_order': 5
             },
 
-            'm_description': {
-                'title': 'Object description',
+            'm_address': {
+                'title': 'Object address',
                 'sorting_order': 10
+            },
+
+            'm_description': {
+                'title': 'Object additional description',
+                'sorting_order': 11
             },
 
             'm_fileUrl': {
                 'title': 'Description url',
                 'description': 'Url of file with additional description',
-                'sorting_order': 11
+                'sorting_order': 14
             },
 
             'm_fileHash': {
                 'title': 'Description hash',
                 'description': 'Hash (keccak256) of file with additional description',
-                'sorting_order': 12
+                'sorting_order': 15
             },
 
             'm_rentDateStart': {
@@ -223,7 +217,7 @@ class Constructor(ConstructorInstance):
                 'title': 'Get booking state',
                 'ui:widget': 'enum',
                 'ui:widget_options': {
-                    'enum': ['Offer', 'Paid', 'No cancel period', 'Rent', 'Finished']
+                    'enum': ['Offer', 'Paid', 'No cancel period', 'Rent', 'Canceled', 'Finished']
                 },
                 'sorting_order': 80
             },
@@ -336,6 +330,7 @@ contract Booking is Ownable {
 
     function Booking() public payable {
 
+        m_address = '%_address%';
         m_description = '%_description%';
         m_fileUrl = '%_fileUrl%';
         m_fileHash = %_fileHash%;
@@ -358,7 +353,7 @@ contract Booking is Ownable {
     }
 
     /************************** STRUCTS **********************/
-    enum State {OFFER, PAID, NO_CANCEL, RENT, FINISHED}
+    enum State {OFFER, PAID, NO_CANCEL, RENT, CANCELED, FINISHED}
 
     /************************** MODIFIERS **********************/
 
@@ -380,6 +375,7 @@ contract Booking is Ownable {
 
     /************************** PROPERTIES **********************/
 
+    string public m_address;
     string public m_description;
     string public m_fileUrl;
     bytes32 public m_fileHash;
@@ -479,6 +475,9 @@ contract Booking is Ownable {
         } else if (State.NO_CANCEL == _newState) {
             assert(false); // no direct change
 
+        } else if (State.CANCELED == _newState) {
+            assert(State.NO_CANCEL == currentState);
+
         } else if (State.RENT == _newState) {
             assert(State.NO_CANCEL == currentState);
 
@@ -509,7 +508,7 @@ contract Booking is Ownable {
     function refundWithCancellationFee() private {
         address client = m_client;
         m_client = address(0);
-        changeState(State.OFFER);
+        changeState(State.CANCELED);
 
         owner.transfer(m_cancellationFee);
         client.transfer(address(this).balance);

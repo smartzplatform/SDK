@@ -88,6 +88,14 @@ class Field():
             self.field_name(fields_vals)
         )
 
+    def input_descr(self):
+        if self.name == 'text_hash':
+            return 'Just type text in textbox. Hash will be calculated automatically'
+        elif self.name == 'file_hash':
+            return 'Just select file. Hash will be calculated automatically'
+        else:
+            return None
+
 
 class Constructor(ConstructorInstance):
 
@@ -372,11 +380,6 @@ class Constructor(ConstructorInstance):
             and self.is_false(fields_vals['url_field'], 'use_url_field') \
             and self.is_false(fields_vals['file_hash_field'], 'use_file_hash_field'):
 
-            # todo waiting for front
-            return {
-                "result": "error",
-                "error_descr": 'At least one field must be selected'
-            }
             errors['text_field'] = {}
             errors['text_field']['use_text_field'] = 'At least one field must be selected'
 
@@ -384,20 +387,12 @@ class Constructor(ConstructorInstance):
         for field_instance in self.iterate_by_selected_fields(fields_vals):
             record_field_name = field_instance.field_name(fields_vals)
             if record_field_name in field_descr_exists:
-                return {
-                    "result": "error",
-                    "error_descr": 'Fields descriptions must be unique'
-                }
                 errors[field_instance.block_name()] = {}
                 errors[field_instance.block_name()][field_instance.descr_field_name()] = 'Fields descriptions must be unique'
 
             field_descr_exists[record_field_name] = True
 
             if 'id' == record_field_name:
-                return {
-                    "result": "error",
-                    "error_descr": 'Fields descriptions must not be "id"'
-                }
                 errors[field_instance.block_name()] = {}
                 errors[field_instance.block_name()][field_instance.descr_field_name()] = 'Fields descriptions must not be "id"'
 
@@ -531,6 +526,9 @@ class Constructor(ConstructorInstance):
             input_schema = {"title": field_instance.field_descr(fields_vals)}
             if field_instance.ui_widget:
                 input_schema['ui:widget'] = field_instance.ui_widget
+
+            if field_instance.input_descr():
+                input_schema['description'] = field_instance.input_descr()
 
             function_titles[fn_name] = {
                 'title': 'Find {} by {}'.format(fields_vals['record_name'], field_instance.field_descr(fields_vals)),

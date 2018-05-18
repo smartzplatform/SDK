@@ -148,7 +148,16 @@
                     "type": "object",
                     "properties": {
                         "format": { "type": "string" },
-                        "enum": { "type": "array", "items": { "type": "string" } }
+                        "enum": { "type": "array", "items": { "type": "string" } },
+                        "show_currency": { "type": "string" }
+                    }
+                },
+                "payable_details": {
+                    "description": "Title and description of input with ether amount",
+                    "type": "object",
+                    "properties": {
+                        "title": { "type": "string" },
+                        "description": { "type": "string" }
                     }
                 },
 
@@ -164,7 +173,11 @@
                             "ui:widget": {
                                 "description": "Widget for input",
                                 "type": "string",
-                                "enum": ["stringHash", "fileHash", "unixTime"]
+                                "enum": ["stringHash", "fileHash", "unixTime", "myAddress", "ethCount"]
+                            },
+                            "ui:options": {
+                                "description": "Ui options",
+                                "type": "object"
                             }
                         }
                     }

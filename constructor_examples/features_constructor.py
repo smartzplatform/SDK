@@ -1,5 +1,4 @@
 import time
-
 from smartz.api.constructor_engine import ConstructorInstance
 
 
@@ -52,6 +51,14 @@ class Constructor(ConstructorInstance):
                     ]
                 },
 
+
+
+                "address": {
+                    "title": "Address",
+                    "description": "See for more definitions https://github.com/smartzplatform/SDK/blob/master/json-schema/ethereum-sc.json",
+                    "$ref": "#/definitions/address"
+                },
+
                 "number": {
                     "title": "Float field",
                     "description": "from 2 to 100 inclusive",
@@ -60,30 +67,29 @@ class Constructor(ConstructorInstance):
                     "type": "number"
                 },
 
+                "block1": {
+                    "title": "Block",
+                    "description": "Some fields can be in block",
+                    "type": "object",
+                    "properties": {
+                        "ethCountPositive": {
+                            "title": "Positive ether count",
+                            "description": "Float like field with without exp notation. Greater than zero",
+                            "$ref": "#/definitions/ethCountPositive"
+                        },
 
-                "ethCountPositive": {
-                    "title": "Positive ether count",
-                    "description": "Float like field with without exp notation. Greater than zero",
-                    "$ref": "#/definitions/ethCountPositive"
+                        "ethCount": {
+                            "title": "Ether count",
+                            "description": "Float like field with without exp notation. Greater or equal zero",
+                            "$ref": "#/definitions/ethCountPositive"
+                        },
+                    }
                 },
-
-                "ethCount": {
-                    "title": "Ether count",
-                    "description": "Float like field with without exp notation. Greater or equal zero",
-                    "$ref": "#/definitions/ethCountPositive"
-                },
-
 
                 "unxtimeWidget": {
                     "title": "Unixtime with widget",
                     "description": "Unixtime will be sent",
                     "$ref": "#/definitions/unixTime"
-                },
-
-                "address": {
-                    "title": "Address",
-                    "description": "See for more definitions https://github.com/smartzplatform/SDK/blob/master/json-schema/ethereum-sc.json",
-                    "$ref": "#/definitions/address"
                 },
 
                 "fileHash": {
@@ -98,13 +104,18 @@ class Constructor(ConstructorInstance):
                     "$ref": "#/definitions/hash"
                 },
 
+                "stringHashSha256": {
+                    "title": "String hash (sha256)",
+                    "description": "Just type text, hash (sha256) of it will be sent",
+                    "$ref": "#/definitions/hash"
+                },
+
                 "addressArray": {
                     "title": "Address array",
                     "description": "Address array with minimum 1 element",
                     "minItems": 1,
                     "$ref": "#/definitions/addressArray"
                 },
-
 
             }
         }
@@ -121,6 +132,12 @@ class Constructor(ConstructorInstance):
             },
             "stringHash": {
                 "ui:widget": "stringHash",
+            },
+            "stringHashSha256": {
+                "ui:widget": "stringHash",
+                "ui:options": {
+                    "algorithm": "sha256"
+                }
             },
         }
 
@@ -143,7 +160,10 @@ class Constructor(ConstructorInstance):
                 "result": "error",
                 "errors": {
                     'string': 'some error',
-                    'enum': ['some error 1', 'some error 2']
+                    'enum': ['some error 1', 'some error 2'],
+                    'block1': {
+                        'ethCount': 'error for item in block'
+                    }
                 }
             }
 
@@ -205,6 +225,9 @@ class Constructor(ConstructorInstance):
                 'title': 'some eth count',
                 'description': 'In variable in smart contract it stored in wei',
                 'ui:widget': 'ethCount',
+                'ui:widget_options': {
+                    'show_currency': 'EUR'
+                },
                 'sorting_order': 50
             },
 
@@ -244,6 +267,26 @@ class Constructor(ConstructorInstance):
                     {'title': 'Date time selector', 'description': 'unixtime will be sent', 'ui:widget': 'unixTime'}
                 ],
                 'sorting_order': 100
+            },
+
+            '': {
+                'title': 'Send ether to contract (fallback)',
+                'description': 'Send ether to contract (fallback description)',
+                'sorting_order': 1,
+                'payable_details': {
+                    'title': 'Ether amount (custom)',
+                    'description': 'This ether amount will be sent to the contract (custom)'
+                }
+            },
+
+            'sendEther': {
+                'title': 'Send ether to contract',
+                'description': 'Payable function. Ether amount can be set',
+                'sorting_order': 200,
+                'payable_details': {
+                    'title': 'Ether amount (custom)',
+                    'description': 'This ether amount will be sent with the function call (custom)'
+                }
             },
         }
 
@@ -312,7 +355,14 @@ contract SmartzFeatures {
     function setDate(uint256 _date) public {
         someDate = _date;
     }
+    
+    function() public payable {
+        ethCount = msg.value;
+    }
 
+    function sendEther() public payable {
+        ethCount = msg.value;
+    }
 }
 
     """

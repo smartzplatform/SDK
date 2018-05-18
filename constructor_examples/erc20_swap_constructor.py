@@ -236,11 +236,6 @@ class Constructor(ConstructorInstance):
 
         errors = self._check_errors(part1, part2, swap_type)
         if errors:
-            # todo remove after supporting of errors dict
-            return {
-                "result": "error",
-                "error_descr": errors
-            }
             return {
                 "result": "error",
                 "errors": errors
@@ -356,15 +351,11 @@ class Constructor(ConstructorInstance):
 
         if "address" in part1 and "address" in part2 \
                 and part1['address'] == part2['address']:
-            # todo remove after supporting of errors
-            return "Participants addresses must be different"
             errors['participant1'] = {
                 'address': "Participants addresses must be different"
             }
 
         if is_true(part1, "use_my_address") and is_true(part2, "use_my_address"):
-            # todo remove after supporting of errors
-            return "Participants addresses must be different"
             errors['participant1'] = {
                 'use_my_address': "Participants addresses must be different"
             }
@@ -372,8 +363,6 @@ class Constructor(ConstructorInstance):
         if swap_type == self._SWAP_TYPE_TOKENS and part1['token'] == part2['token']:
             if 'participant1' not in errors:
                 errors['participant1'] = {}
-            # todo remove after supporting of errors
-            return "Tokens addresses must be different"
             errors['participant1']['token'] = "Tokens addresses must be different"
 
         return errors

@@ -1,3 +1,6 @@
+
+import re
+
 from smartz.api.constructor_engine import ConstructorInstance
 
 
@@ -34,6 +37,13 @@ class Constructor(ConstructorInstance):
                     "items": {"$ref": "#/definitions/address"},
                     "minItems": 1,
                     "maxItems": self.__class__.MAX_OWNERS
+                },
+
+                "thaw_ts": {
+                    "title": "Thaw time",
+                    "description": "Until that time any funds or tokens which is held by this contract will be frozen "
+                                   "- no one will be able to transfer it.",
+                     "$ref": "#/definitions/unixTime",
                 }
             }
         }
@@ -49,6 +59,9 @@ class Constructor(ConstructorInstance):
                 "ui:options": {
                     "orderable": False
                 }
+            },
+            "thaw_ts": {
+                "ui:widget": "unixTime"
             }
         }
 
@@ -70,21 +83,36 @@ class Constructor(ConstructorInstance):
                 "errors": errors
             }
 
-        signers_txt = '\n'.join('_owners.push(address({}));'.format(owner) for owner in fields['owners'])
+        def safe_replace(string, from_, to_):
+            result = string.replace(from_, to_)
+            if result == string:
+                raise AssertionError('failed to replace: {}'.format(from_))
+            return result
 
-        source = self.__class__._TEMPLATE \
-                     .replace('%owners%', signers_txt) \
-                     .replace('%signs_count%', str(fields['signs_count']))
+        owners_code = 'address[] memory result = new address[]({});\n'.format(len(fields['owners']))
+        owners_code += '\n'.join(
+            'result[{}] = address({});'.format(idx, owner) for (idx, owner) in enumerate(fields['owners'])
+        )
+
+        source = safe_replace(self.__class__._TEMPLATE, '%owners_code%', owners_code)
+        source = safe_replace(source, '%signs_count%', str(fields['signs_count']))
+        source = safe_replace(source, '%thaw_ts%', str(fields.get('thaw_ts', 0)))
+
+        # final checks
+
+        for match in re.findall(r'%([a-zA-Z_0-9]+)%', source):
+            if match != 'payment_code':
+                raise AssertionError('not substituted: {}'.format(match))
 
         return {
             'result': "success",
             'source': source,
-            'contract_name': "SimpleMultiSigWallet"
+            'contract_name': "MultiSigWallet"
         }
 
     def post_construct(self, fields, abi_array):
 
-        function_titles = {
+        function_specs = {
             'm_numOwners': {
                 'title': 'Number of owners',
                 'description': 'How many owners are added to the contract',
@@ -201,18 +229,28 @@ class Constructor(ConstructorInstance):
                     'title': 'New address',
                 }]
             },
+
+            'frozenUntil': {
+                'title': 'Thaw time',
+                'description': "Until that time any funds or tokens which is held by this contract will be frozen "
+                               "- no one will be able to transfer it.",
+                'ui:widget': 'unixTime',
+                'ui:widget_options': {
+                    'format': "yyyy.mm.dd HH:MM:ss (o)"
+                },
+            }
         }
 
         return {
             "result": "success",
-            'function_specs': function_titles,
+            'function_specs': function_specs,
             'dashboard_functions': ['m_numOwners', 'm_multiOwnedRequired']
         }
 
 
     # language=Solidity
     _TEMPLATE = """
-// Copyright (C) 2017  MixBytes, LLC
+// Copyright (C) 2017-2018  MixBytes, LLC
 
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -235,9 +273,6 @@ class Constructor(ConstructorInstance):
 
 pragma solidity ^0.4.15;
 
-
-/// note: during any ownership changes all pending operations (waiting for more signatures) are cancelled
-// TODO acceptOwnership
 contract multiowned {
 
 	// TYPES
@@ -316,16 +351,11 @@ contract multiowned {
 
     // constructor is given number of sigs required to do protected "onlymanyowners" transactions
     // as well as the selection of addresses capable of confirming them (msg.sender is not added to the owners!).
-    address[] _owners;
-    function multiowned() public
+    function multiowned(address[] _owners, uint _required)
+        public
+        validNumOwners(_owners.length)
+        multiOwnedValidRequirement(_required, _owners.length)
     {
-        uint _required = %signs_count%;
-
-        %owners%
-
-        require(_owners.length > 0 && _owners.length <= c_maxOwners);
-        require(_required > 0 && _required <= _owners.length);
-
         assert(c_maxOwners <= 255);
 
         m_numOwners = _owners.length;
@@ -626,39 +656,28 @@ contract multiowned {
     bytes32[] internal m_multiOwnedPendingIndex;
 }
 
-/**
- * @title ERC20Basic
- * @dev Simpler version of ERC20 interface
- * @dev see https://github.com/ethereum/EIPs/issues/179
- */
 contract ERC20Basic {
-  function totalSupply() public view returns (uint256);
+  uint256 public totalSupply;
   function balanceOf(address who) public view returns (uint256);
   function transfer(address to, uint256 value) public returns (bool);
   event Transfer(address indexed from, address indexed to, uint256 value);
 }
 
-/**
- * @title Basic demonstration of multi-owned entity.
- */
 contract SimpleMultiSigWallet is multiowned {
 
     event Deposit(address indexed sender, uint value);
     event EtherSent(address indexed to, uint value);
-    event TokensSent(address token, address indexed to, uint value);
 
-    function SimpleMultiSigWallet()
-        multiowned()
+    function SimpleMultiSigWallet(address[] _owners, uint _signaturesRequired)
         public
-        payable
+        multiowned(_owners, _signaturesRequired)
     {
-        %payment_code%
     }
 
     /// @dev Fallback function allows to deposit ether.
     function()
-        payable
         public
+        payable
     {
         if (msg.value > 0)
             Deposit(msg.sender, msg.value);
@@ -668,7 +687,7 @@ contract SimpleMultiSigWallet is multiowned {
     /// @param to where to send ether
     /// @param value amount of wei to send
     function sendEther(address to, uint value)
-        external
+        public
         onlymanyowners(keccak256(msg.data))
     {
         require(address(0) != to);
@@ -676,25 +695,97 @@ contract SimpleMultiSigWallet is multiowned {
         to.transfer(value);
         EtherSent(to, value);
     }
-    
+}
+
+contract MultiSigWallet is SimpleMultiSigWallet {
+
+    // EVENTS
+
+    event TokensSent(address token, address indexed to, uint value);
+
+
+    // MODIFIERS
+
+    modifier notFrozen {
+        require(getCurrentTime() >= m_thawTs);
+        _;
+    }
+
+
+    // PUBLIC FUNCTIONS
+
+    function MultiSigWallet()
+        public
+        payable
+        SimpleMultiSigWallet(getInitialOwners(), %signs_count%)
+    {
+        m_thawTs = %thaw_ts%;
+
+        %payment_code%
+    }
+
+    function getInitialOwners() private pure returns (address[]) {
+        %owners_code%
+        return result;
+    }
+
+    function sendEther(address to, uint value)
+        public
+        notFrozen
+    {
+        super.sendEther(to, value);
+    }
+
     function sendTokens(address token, address to, uint value)
-        external
+        public
+        notFrozen
         onlymanyowners(keccak256(msg.data))
         returns (bool)
     {
         require(address(0) != to);
-        
+        require(address(0) != token);
+        require(token != to);
+        require(isContract(token));
+
         if (ERC20Basic(token).transfer(to, value)) {
             TokensSent(token, to, value);
             return true;
         }
-        
+
         return false;
     }
-    
-    function tokenBalance(address token) external view returns (uint256) {
+
+
+    // PUBLIC VIEW FUNCTIONS
+
+    function tokenBalance(address token) public view returns (uint256) {
         return ERC20Basic(token).balanceOf(this);
     }
-}
 
+    function frozenUntil() public view returns (uint) {
+        return m_thawTs;
+    }
+
+
+    // INTERNAL FUNCTIONS
+
+    function isContract(address _addr)
+        private
+        view
+        returns (bool hasCode)
+    {
+        uint length;
+        assembly { length := extcodesize(_addr) }
+        return length > 0;
+    }
+
+    function getCurrentTime() internal view returns (uint) {
+        return now;
+    }
+
+
+    // FIELDS
+
+    uint private m_thawTs;
+}
     """
