@@ -8,3 +8,8 @@ To start coding in Smartz framework you can research our examples.
 
 ### bin/run-constructor.py
 CLI utility for testing Smartz contract constructors. Run `python3 run-constructor.py construct -h` for help.
+
+## How to upload your contract to Smartz
+1. Use this SDK to convert your smart contracts into Smartz constructors (aka templates).
+2. Upload your constructors to Smartz (https://smartz.io/ctor-add) and test them (https://smartz.io/my-dapps).
+3. If you have cool tested constructor write to us hello@smartz.io, we will review and publish it so you can share it widely and even earn if you want.
