@@ -1,4 +1,4 @@
-# smartz-public
+# Smartz SDK
 In this repo you can find Smartz platform developer's resources. Documentation is under construction, feel free to ask us your questions here: https://t.me/smartz_en.
 
 Lean guide in our wiki: https://wiki.smartz.io/en/contract-uploading. Extended version is coming soon.
