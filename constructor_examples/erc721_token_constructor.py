@@ -1151,15 +1151,15 @@ contract PausableToken is ERC721BasicToken, Pausable {
         return super.setApprovalForAll(_to, _approved);
     }
 
-    function transferFrom(address _from, address _to, uint256 _tokenId) public whenNotPaused canTransfer(_tokenId) {
+    function transferFrom(address _from, address _to, uint256 _tokenId) public whenNotPaused {
         return super.transferFrom(_from, _to, _tokenId);
     }
 
-    function safeTransferFrom(address _from, address _to, uint256 _tokenId) public whenNotPaused canTransfer(_tokenId) {
+    function safeTransferFrom(address _from, address _to, uint256 _tokenId) public whenNotPaused {
         return super.safeTransferFrom(_from, _to, _tokenId);
     }
 
-    function safeTransferFrom(address _from, address _to, uint256 _tokenId, bytes _data) public whenNotPaused canTransfer(_tokenId) {
+    function safeTransferFrom(address _from, address _to, uint256 _tokenId, bytes _data) public whenNotPaused {
         return super.safeTransferFrom(_from, _to, _tokenId, _data);
     }
 }
