@@ -91,6 +91,8 @@ class Constructor(ConstructorInstance):
         if 'max_tokens_count' in fields and fields['max_tokens_count']:
             parents.append('CappedToken')
             constructors_code += 'CappedToken({})'.format(fields['max_tokens_count'])
+        else:
+            parents.append('MintableToken')
 
         if fields['is_burnable'] and fields['is_pausable']:
             parents.append('BurnablePausableToken')
