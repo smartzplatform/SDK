@@ -45,7 +45,7 @@ class Constructor(ConstructorInstance):
                     "maximum": 2**63,
                     "default": 100,
                     "title": "Max tokens count",
-                    "description": "Max tokens count. Used for mintable tokens. Leave blank for unlimited tokens count"
+                    "description": "Max tokens count. Leave blank for unlimited tokens count"
                 },
                 #"premint": {
                 #    "type": "integer",
