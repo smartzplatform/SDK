@@ -124,7 +124,7 @@ class Constructor(ConstructorInstance):
 
                 m_emissions.push(EmissionInfo({{
                     totalSupply: totalSupply_,
-                    totalBalanceWas: this.balance
+                    totalBalanceWas: 0
                 }}));
 
             """.format(fields['premint'])
@@ -681,8 +681,8 @@ contract DividendToken is StandardToken {
     public
     {
         m_emissions.push(EmissionInfo({
-             totalSupply: totalSupply_,
-            totalBalanceWas: this.balance
+            totalSupply: totalSupply_,
+            totalBalanceWas: 0
         }));
     }
 
@@ -734,10 +734,12 @@ contract DividendToken is StandardToken {
         uint256 lastAccountEmissionNum = m_lastAccountEmission[_for];
         assert(lastAccountEmissionNum <= lastEmissionNum);
 
-        uint lastBalanceWasWhenPayed = m_lastDividents[_for];
+        uint totalBalanceWasWhenLastPay = m_lastDividents[_for];
+
+        assert(m_totalDividends >= totalBalanceWasWhenLastPay);
 
         // If no new ether was collected since last dividends claim
-        if (m_totalDividends <= lastBalanceWasWhenPayed)
+        if (m_totalDividends == totalBalanceWasWhenLastPay)
             return (false, 0);
 
         uint256 initialBalance = balances[_for];    // beware of recursion!
@@ -755,11 +757,14 @@ contract DividendToken is StandardToken {
                 continue;
 
             uint totalEtherDuringEmission;
+            // last emission we stopped on
             if (emissionToProcess == lastEmissionNum) {
-                totalEtherDuringEmission = m_totalDividends - lastBalanceWasWhenPayed;
+                totalEtherDuringEmission = 0;
+                totalEtherDuringEmission = m_totalDividends.sub(totalBalanceWasWhenLastPay);
             }
             else {
-                totalEtherDuringEmission = m_emissions[emissionToProcess+1].totalBalanceWas - lastBalanceWasWhenPayed;
+                totalEtherDuringEmission = m_emissions[emissionToProcess.add(1)].totalBalanceWas.sub(totalBalanceWasWhenLastPay);
+                totalBalanceWasWhenLastPay = m_emissions[emissionToProcess.add(1)].totalBalanceWas;
             }
 
             uint256 dividend = totalEtherDuringEmission.mul(initialBalance).div(emission.totalSupply);
@@ -796,7 +801,7 @@ contract MintableDividendToken is DividendToken, MintableToken {
 
         m_emissions.push(EmissionInfo({
             totalSupply: totalSupply_,
-            totalBalanceWas: this.balance
+            totalBalanceWas: m_totalDividends
         }));
         
         return res;
