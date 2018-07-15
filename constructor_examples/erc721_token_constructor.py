@@ -45,7 +45,7 @@ class Constructor(ConstructorInstance):
                     "maximum": 2**63,
                     "default": 100,
                     "title": "Max tokens count",
-                    "description": "Max tokens count. Used for mintable tokens. Leave blank for unlimited tokens count"
+                    "description": "Max tokens count. Leave blank for unlimited tokens count"
                 },
                 #"premint": {
                 #    "type": "integer",
@@ -91,6 +91,8 @@ class Constructor(ConstructorInstance):
         if 'max_tokens_count' in fields and fields['max_tokens_count']:
             parents.append('CappedToken')
             constructors_code += 'CappedToken({})'.format(fields['max_tokens_count'])
+        else:
+            parents.append('MintableToken')
 
         if fields['is_burnable'] and fields['is_pausable']:
             parents.append('BurnablePausableToken')
@@ -158,16 +160,35 @@ class Constructor(ConstructorInstance):
                 }]
             },
             'mint': {
-                'title': 'Mint new tokens',
-                'description': 'Creates new tokens out-of-thin-air and gives them to specified address. Callable only by token owner.',
-                'inputs': [{
-                    'title': 'Address',
-                    'description': 'Transfer tokens to this address.',
-                }, {
-                    'title': 'TokenId',
-                }]
+                'title': 'Mint new token',
+                'description': 'Creates new token out-of-thin-air and gives it to specified address. Callable only by token owner.',
+                'inputs': [
+                    {
+                        'title': 'Address',
+                        'description': 'Transfer tokens to this address.',
+                    },
+                    {
+                        'title': 'TokenId',
+                    },
+                ]
             },
-
+            'mintWithURI': {
+                'title': 'Mint new token with URI',
+                'description': 'Creates new token out-of-thin-air, assignes unique name on it and gives it to specified address. Callable only by token owner.',
+                'inputs': [
+                    {
+                        'title': 'Address',
+                        'description': 'Transfer tokens to this address.',
+                    },
+                    {
+                        'title': 'TokenId',
+                    },
+                    {
+                        'title': 'URI',
+                        'description': 'Unique token name'
+                    },
+                ]
+            },
             'finishMinting': {
                 'title': 'Finish minting',
                 'description': 'Disables any further token creation via minting. Callable only by token owner.',
@@ -1057,7 +1078,12 @@ contract MintableToken is ERC721Token, Ownable {
     function mint(address _to, uint256 _tokenId) public onlyOwner canMint {
         _mint(_to, _tokenId);
     }
-    
+
+    function mintWithURI(address _to, uint256 _tokenId, string _uri) public onlyOwner canMint {
+        _mint(_to, _tokenId);
+        super._setTokenURI(_tokenId, _uri);
+    }
+
     /**
      * @dev Function to stop minting new tokens.
      * @return True if the operation was successful.
@@ -1091,6 +1117,12 @@ contract CappedToken is MintableToken {
         require(totalSupply().add(1) <= cap);
 
         return super.mint(_to, _tokenId);
+    }
+
+    function mintWithURI(address _to, uint256 _tokenId, string _uri) onlyOwner canMint public {
+        require(totalSupply().add(1) <= cap);
+
+        return super.mintWithURI(_to, _tokenId, _uri);
     }
 
 }
