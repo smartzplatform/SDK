@@ -787,7 +787,7 @@ contract DividendToken is StandardToken {
 
     /// @dev to prevent gasLimit problems with many mintings
     function getMaxIterationsForRequestDividends() private view returns (uint256) {
-        return 1000;
+        return 200;
     }
 
     /// @notice record of issued dividend emissions
