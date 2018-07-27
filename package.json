@@ -1,0 +1,24 @@
+{
+  "name": "smartz-sdk",
+  "version": "0.11.0",
+  "description": "Public smartz platform resources (integration, SDK, etc)",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/smartzplatform/SDK"
+  },
+  "keywords": [
+    "Smartz",
+    "SDK",
+    "smart-contract",
+    "solidity",
+    "ethereum",
+    "security",
+    "EOS"
+  ],
+  "author": "Eenae",
+  "license": "Apache-2.0",
+  "homepage": "https://smartz.io",
+  "dependencies": {
+  }
+}

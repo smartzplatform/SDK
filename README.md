@@ -3,11 +3,29 @@ In this repo you can find Smartz platform developer's resources. Documentation i
 
 Lean guide in our wiki: https://wiki.smartz.io/en/contract-uploading. Extended version is coming soon.
 
+## Installing SDK
+
+Via npm:
+
+```bash
+npm i smartz-sdk
+```
+
+Or simply by cloning:
+
+```bash
+git clone https://github.com/smartzplatform/SDK.git smartz-sdk
+```
+
+
+## Contents
+
 ### constructor_examples
 To start coding in Smartz framework you can research our examples.
 
 ### bin/run-constructor.py
 CLI utility for testing Smartz contract constructors. Run `python3 run-constructor.py construct -h` for help.
+
 
 ## How to upload your contract to Smartz
 1. Use this SDK to convert your smart contracts into Smartz constructors (aka templates).

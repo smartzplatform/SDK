@@ -8,7 +8,7 @@ from abc import ABCMeta, abstractmethod
 
 class ConstructorInstance(metaclass=ABCMeta):
     """
-    Constructor interface (v1).
+    Constructor interface (v2).
     """
 
     @abstractmethod
@@ -19,7 +19,8 @@ class ConstructorInstance(metaclass=ABCMeta):
 
         Returns: {
             "result": "success",
-            "version": 1 # integer
+            "blockchain": "ethereum", # string, ethereum or eos
+            "version": 2 # integer
         }
 
         or throws exception.

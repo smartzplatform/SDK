@@ -13,6 +13,10 @@
                 "type": "object"
             }
         },
+        "EOSABI": {
+            "description": "Ethereum contract ABI array",
+            "type": "object"
+        },
         "ETHFunctionArgumentList": {
             "description": "Ethereum function inputs or returns list (definition will be removed after 01.05.2017)",
             "allOf": [
@@ -64,6 +68,28 @@
                 "sorting_order": {
                     "description": "Sorting order in dashboard",
                     "type": "integer"
+                },
+                "ui:widget": {
+                    "description": "Widget for function result",
+                    "type": "string",
+                    "enum": ["unixTime", "ethCount", "enum", "url"]
+                },
+                "ui:widget_options": {
+                    "description": "Options of widget for function result",
+                    "type": "object",
+                    "properties": {
+                        "format": { "type": "string" },
+                        "enum": { "type": "array", "items": { "type": "string" } },
+                        "show_currency": { "type": "string" }
+                    }
+                },
+                "payable_details": {
+                    "description": "Title and description of input with ether amount",
+                    "type": "object",
+                    "properties": {
+                        "title": { "type": "string" },
+                        "description": { "type": "string" }
+                    }
                 },
                 "constant": {
                     "type": "boolean"

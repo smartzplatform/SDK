@@ -6,7 +6,7 @@ import argparse
 import importlib
 from contextlib import contextmanager
 from tempfile import mkdtemp
-from shutil import rmtree
+from shutil import rmtree, copy2
 from pprint import pprint
 import json
 
@@ -24,7 +24,7 @@ def die(message, *args):
 @contextmanager
 def instantiate(filename):
     temp_dir = mkdtemp(prefix='run_constructor')
-    os.link(filename, os.path.join(temp_dir, 'constructor.py'))
+    copy2(filename, os.path.join(temp_dir, 'constructor.py'))
 
     sys.path.append(temp_dir)
     try:

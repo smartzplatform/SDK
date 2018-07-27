@@ -1,5 +1,26 @@
 # Versions of constructor api
 
+## version 2
+
+- Additional key `blockchain` added to result of method `get_version`:
+```python
+    @abstractmethod
+    def get_version(self):
+        """
+        Get version of constructor api. If function is not exist version 0 would be used
+        Since version 1 of constructor api
+
+        Returns: {
+            "result": "success",
+            "blockchain": "ethereum", # string, ethereum or eos
+            "version": 2 # integer
+        }
+
+        or throws exception.
+        """
+        raise NotImplementedError()
+```
+
 
 ## version 1
 
