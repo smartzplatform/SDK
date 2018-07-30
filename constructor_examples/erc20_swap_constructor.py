@@ -1,10 +1,11 @@
 from typing import Dict
 
 from smartz.api.constructor_engine import ConstructorInstance
-from smartz.eth.contracts import make_generic_function_spec, merge_function_titles2specs
+
 
 def is_true(arr, key):
     return key in arr and bool(arr[key])
+
 
 class Constructor(ConstructorInstance):
 
@@ -25,6 +26,12 @@ class Constructor(ConstructorInstance):
         self._CHECK_TRANSFER2: Dict[str, str] = {
             self._SWAP_TYPE_ETHER:  self._TEMPLATE_TOKENS_FOR_ETHER_CHECK_TRANSFER2,
             self._SWAP_TYPE_TOKENS: self._TEMPLATE_TOKENS_FOR_TOKENS_CHECK_TRANSFER2
+        }
+
+    def get_version(self):
+        return {
+            "result": "success",
+            "version": 1
         }
 
     def get_params(self):
@@ -341,7 +348,7 @@ class Constructor(ConstructorInstance):
 
         return {
             "result": "success",
-            'function_specs': merge_function_titles2specs(make_generic_function_spec(abi_array), function_titles),
+            'function_specs': function_titles,
             'dashboard_functions': ['isFinished', 'participant1', 'participant2']
         }
 

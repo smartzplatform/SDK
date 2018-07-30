@@ -1,9 +1,14 @@
-
 from smartz.api.constructor_engine import ConstructorInstance
-from smartz.eth.contracts import merge_function_titles2specs, make_generic_function_spec
 
 
 class Constructor(ConstructorInstance):
+
+    def get_version(self):
+        return {
+            "result": "success",
+            "blockchain": "ethereum",
+            "version": 2
+        }
 
     def get_params(self):
         json_schema = {
@@ -172,7 +177,7 @@ class Constructor(ConstructorInstance):
 
         return {
             "result": "success",
-            'function_specs': merge_function_titles2specs(make_generic_function_spec(abi_array), function_titles),
+            'function_specs': function_titles,
             'dashboard_functions': ['collectedEther', 'totalTokens', 'daysRemaining']
         }
 

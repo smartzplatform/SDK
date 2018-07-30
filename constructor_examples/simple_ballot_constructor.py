@@ -6,7 +6,8 @@ class Constructor(ConstructorInstance):
     def get_version(self):
         return {
             "result": "success",
-            "version": 1
+            "blockchain": "ethereum",
+            "version": 2
         }
 
     def get_params(self):
@@ -24,7 +25,7 @@ class Constructor(ConstructorInstance):
                     "type": "string",
                     "minLength": 3,
                     "maxLength": 200,
-                    "pattern": "^[a-zA-Z0-9,\.\? ]+$"
+                    "pattern": "^[a-zA-Z0-9,\.\? \:а-яА-Я]+$"
                 },
 
                 "variants": {
@@ -38,7 +39,7 @@ class Constructor(ConstructorInstance):
                         "type": "string",
                         "minLength": 1,
                         "maxLength": 200,
-                        "pattern": "^[a-zA-Z0-9,\.\? ]+$"
+                        "pattern": "^[a-zA-Z0-9,\.\? а-яА-Я]+$"
                     }
                 }
 
