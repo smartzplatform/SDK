@@ -23,7 +23,7 @@ class Constructor(ConstructorInstance):
             "properties": {
                 "name": {
                     "title": "Name of a token",
-                    "description": "Token human-friendly name (3..100 characters, letters, digits and spaces only)",
+                    "description": "Public token human-friendly name (3..100 characters, letters, digits and spaces only).",
                     "type": "string",
                     "minLength": 3,
                     "maxLength": 100,
@@ -32,7 +32,7 @@ class Constructor(ConstructorInstance):
 
                 "symbol": {
                     "title": "Token Symbol",
-                    "description": "Token ticker (2..10 characters, letters and digits only)",
+                    "description": "Token ticker, like BTC or ETH (2..10 characters, letters and digits only).",
                     "type": "string",
                     "minLength": 2,
                     "maxLength": 10,
@@ -41,7 +41,7 @@ class Constructor(ConstructorInstance):
 
                 "decimals": {
                     "title": "Decimals",
-                    "description": "Token decimals (0..18)",
+                    "description": "Token decimal places, determines the size of smallest quantum of your token (0..18).",
                     "type": "integer",
                     "minimum": 0,
                     "maximum": 18
@@ -50,8 +50,8 @@ class Constructor(ConstructorInstance):
                 "is_mintable": {
                     "type": "boolean",
                     "default": False,
-                    "title": "Is mintable",
-                    "description": "Can token owner mint new tokens?"
+                    "title": "Is token mintable?",
+                    "description": "If checked, token owner can mint new tokens up to Maximum value of issue."
                 },
 
                 "max_tokens_count": {
@@ -59,8 +59,8 @@ class Constructor(ConstructorInstance):
                     "minimum": 1,
                     "maximum": 2**63,
                     "default": 100,
-                    "title": "Max tokens count",
-                    "description": "Max tokens count. Used for mintable tokens. Leave blank for unlimited tokens count"
+                    "title": "Maximun value of issue",
+                    "description": "Maximum possible number of existing tokens. Matters only for mintable tokens. Leave blank for unlimited."
                 },
 
                 "premint": {
@@ -69,7 +69,7 @@ class Constructor(ConstructorInstance):
                     "minimum": 1,
                     "maximum": 2 ** 63,
                     "title": "Premint tokens",
-                    "description": "Premint tokens will be sent to token owner. Leave blank for no premint"
+                    "description": "How many tokens to premint and give to owner (you) right after deploy. For not mintable tokens this is the only way to create tokens at all. Leave blank to skip preminting."
                 },
 
 
@@ -77,14 +77,14 @@ class Constructor(ConstructorInstance):
                     "type": "boolean",
                     "default": False,
                     "title": "Is token burnable?",
-                    "description": "Can token holders burn their tokens?"
+                    "description": "If checked, any token holder can explicitly burn his tokens by special transaction."
                 },
 
                 "is_pausable": {
                     "type": "boolean",
                     "default": False,
                     "title": "Is token pausable?",
-                    "description": "Token owner will be able to pause token functions"
+                    "description": "If checked, token owner can pause all token functions for a while."
                 },
 
             }
@@ -154,64 +154,71 @@ class Constructor(ConstructorInstance):
     def post_construct(self, fields, abi_array):
 
         function_titles = {
-            'pause': {
-                'title': 'Pause circulation',
-                'description': 'Disable any token transfers. Callable only by token owner.',
+            #
+            # VIEW functions
+            #
+            'name': {
+                'title': 'Token name',
+                'description': 'Human-friendly name of the token.',
+                'sorting_order': 10,
             },
 
-            'unpause': {
-                'title': 'Enable circulation',
-                'description': 'Enables token transfers in case they were paused. Callable only by token owner.',
+            'symbol': {
+                'title': 'Token ticker',
+                'description': 'Abbreviated name of the token used on exchanges etc.',
+                'sorting_order': 20,
             },
 
-            'burn': {
-                'title': 'Burn tokens',
-                'description': 'Burns specified amount of tokens owned by current account.',
-                'inputs': [{
-                    'title': 'Amount',
-                    'description': 'Amount must be specified in the smallest units of the token.'
-                }]
+            'decimals': {
+                'title': 'Decimal places',
+                'description': 'Allowed digits in fractional part of the token. E.g. decimal places of US dollar is 2.',
+                'sorting_order': 30,
             },
 
-            'mint': {
-                'title': 'Mint new tokens',
-                'description': 'Creates new tokens out-of-thin-air and gives them to specified address. Callable only by token owner.',
+            'totalSupply': {
+                'title': 'Total supply',
+                'description': 'Current total amount of the token. Specified in the smallest units of the token.',
+                'sorting_order': 40,
+            },
+
+            'cap': {
+                'title': 'Maximun value of issue',
+                'description': 'Maximum number of tokens which could be created. Return value is specified in the smallest units of the token.',
+                'sorting_order': 50,
+            },
+
+            'mintingFinished': {
+                'title': 'Minting finished',
+                'description': 'If true, no more tokens could be created.',
+                'sorting_order': 60,
+            },
+
+            'paused': {
+                'title': 'Paused',
+                'description': 'If true, all token functions are disabled.',
+                'sorting_order': 70,
+            },
+
+            'owner': {
+                'title': 'Owner',
+                'description': 'Address of the token owner.',
+                'sorting_order': 80,
+            },
+
+            #
+            # ASK functions
+            #
+            'balanceOf': {
+                'title': 'Get balance',
+                'description': 'Gets the token balance of any address. Return value is specified in the smallest units of the token.',
                 'inputs': [{
                     'title': 'Address',
-                    'description': 'Transfer tokens to this address.',
-                }, {
-                    'title': 'Amount',
-                    'description': 'Amount must be specified in the smallest units of the token.',
-                }]
-            },
-
-            'finishMinting': {
-                'title': 'Finish minting',
-                'description': 'Disables any further token creation via minting. Callable only by token owner.',
-            },
-
-            'decreaseApproval': {
-                'title': 'Decrease approval',
-                'description': 'Decreases amount of your tokens which are allowed to be spent by specified address.',
-                'inputs': [{
-                    'title': 'Address',
-                    'description': 'Address which was allowed to spend tokens.',
-                }, {
-                    'title': 'Amount',
-                    'description': 'Amount must be specified in the smallest units of the token.',
-                }]
-            },
-
-            'increaseApproval': {
-                'title': 'Increase approval',
-                'description': 'Increases amount of your tokens which are allowed to be spent by specified address.',
-                'inputs': [{
-                    'title': 'Address',
-                    'description': 'Address which was allowed to spend tokens.',
-                }, {
-                    'title': 'Amount',
-                    'description': 'Amount must be specified in the smallest units of the token.',
-                }]
+                }],
+                'sorting_order': 110,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'wallet'
+                },
             },
 
             'allowance': {
@@ -223,19 +230,33 @@ class Constructor(ConstructorInstance):
                 }, {
                     'title': 'Address of spender',
                     'description': 'Address which was allowed to spend tokens.',
-                }]
+                }],
+                'sorting_order': 110,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'lock-question'
+                },
             },
 
-            'approve': {
-                'title': 'Approve spending',
-                'description': 'Allow some amount of your tokens to be spent by specified address.',
+            #
+            # WRITE functions
+            #
+            'transfer': {
+                'title': 'Transfer tokens',
+                'description': 'Transfers some amount of your tokens to another address.',
                 'inputs': [{
-                    'title': 'Address',
-                    'description': 'Address to allow to spend tokens.',
+                    'title': 'To',
+                    'description': 'Recipient address.',
                 }, {
                     'title': 'Amount',
-                    'description': 'Amount must be specified in the smallest units of the token.',
-                }]
+                    'description': 'Amount should be specified in the smallest units of the token.',
+                }],
+                'sorting_order': 210,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'arrow-right'
+                },
+
             },
 
             'transferFrom': {
@@ -249,48 +270,134 @@ class Constructor(ConstructorInstance):
                     'description': 'Transfer tokens to this account.',
                 }, {
                     'title': 'Amount',
-                    'description': 'Amount must be specified in the smallest units of the token.',
-                }]
+                    'description': 'Amount should be specified in the smallest units of the token.',
+                }],
+                'sorting_order': 220,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'arrow-expand-right'
+                },
+
             },
 
-            'name': {
-                'title': 'Token name',
-                'description': 'Human-friendly name of the token.',
-            },
-
-            'symbol': {
-                'title': 'Token ticker',
-                'description': 'Abbreviated name of the token used on exchanges etc.',
-            },
-
-            'decimals': {
-                'title': 'Decimal places',
-                'description': 'Allowed digits in fractional part of the token. E.g. decimal places of US dollar is 2.',
-            },
-
-            'balanceOf': {
-                'title': 'Get balance',
-                'description': 'Gets the token balance of any address. Return value is specified in the smallest units of the token.',
+            'approve': {
+                'title': 'Approve spending',
+                'description': 'Allow some amount of your tokens to be spent by specified address.',
                 'inputs': [{
                     'title': 'Address',
-                }]
+                    'description': 'Address to allow to spend tokens.',
+                }, {
+                    'title': 'Amount',
+                    'description': 'Amount should be specified in the smallest units of the token.',
+                }],
+                'sorting_order': 230,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'approval'
+                },
+
             },
 
-            'transfer': {
-                'title': 'Transfer tokens',
-                'description': 'Transfers some amount of your tokens to another address.',
+            'increaseApproval': {
+                'title': 'Increase approval',
+                'description': 'Increases amount of your tokens which are allowed to be spent by specified address.',
                 'inputs': [{
-                    'title': 'To',
-                    'description': 'Recipient address.',
+                    'title': 'Address',
+                    'description': 'Address which was allowed to spend tokens.',
                 }, {
                     'title': 'Amount',
                     'description': 'Amount must be specified in the smallest units of the token.',
-                }]
+                }],
+                'sorting_order': 240,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'arrow-up-bold-circle-outline'
+                },
+
             },
 
-            'totalSupply': {
-                'title': 'Total supply',
-                'description': 'Current total amount of the token. Specified in the smallest units of the token.',
+            'decreaseApproval': {
+                'title': 'Decrease approval',
+                'description': 'Decreases amount of your tokens which are allowed to be spent by specified address.',
+                'inputs': [{
+                    'title': 'Address',
+                    'description': 'Address which was allowed to spend tokens.',
+                }, {
+                    'title': 'Amount',
+                    'description': 'Amount must be specified in the smallest units of the token.',
+                }],
+                'sorting_order': 250,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'arrow-down-bold-circle-outline'
+                },
+
+            },
+
+            'burn': {
+                'title': 'Burn tokens',
+                'description': 'Burns specified amount of tokens owned by current account.',
+                'inputs': [{
+                    'title': 'Amount',
+                    'description': 'Amount must be specified in the smallest units of the token.'
+                }],
+                'sorting_order': 260,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'fire'
+                },
+
+            },
+
+            'pause': {
+                'title': 'Pause circulation',
+                'description': 'Disable any token transfers. Callable only by token owner.',
+                'sorting_order': 270,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'pause'
+                },
+
+            },
+
+            'unpause': {
+                'title': 'Enable circulation',
+                'description': 'Enables token transfers in case they were paused. Callable only by token owner.',
+                'sorting_order': 280,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'play'
+                },
+
+            },
+
+            'mint': {
+                'title': 'Mint new tokens',
+                'description': 'Creates new tokens out-of-thin-air and gives them to specified address. Callable only by token owner.',
+                'inputs': [{
+                    'title': 'Address',
+                    'description': 'Transfer tokens to this address.',
+                }, {
+                    'title': 'Amount',
+                    'description': 'Amount must be specified in the smallest units of the token.',
+                }],
+                'sorting_order': 290,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'coins'
+                },
+
+            },
+
+            'finishMinting': {
+                'title': 'Finish minting',
+                'description': 'Disables any further token creation via minting. Callable only by token owner.',
+                'sorting_order': 300,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'stop'
+                },
+
             },
 
             'transferOwnership': {
@@ -299,34 +406,20 @@ class Constructor(ConstructorInstance):
                 'inputs': [{
                     'title': 'Address',
                     'description': 'Address which\'ll receive ownership rights.',
-                }]
-            },
+                }],
+                'sorting_order': 310,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'account-switch'
+                },
 
-            'mintingFinished': {
-                'title': 'Minting finished',
-                'description': 'If true no more tokens could be created.',
-            },
-
-            'cap': {
-                'title': 'Maximum tokens',
-                'description': 'Maximum number of tokens which could be created. Return value is specified in the smallest units of the token.',
-            },
-
-            'paused': {
-                'title': 'Paused',
-                'description': 'If true any token transfers are disabled.',
-            },
-
-            'owner': {
-                'title': 'Owner',
-                'description': 'Address of the token owner.',
             }
         }
 
         return {
             "result": "success",
             'function_specs': function_titles,
-            'dashboard_functions': ['symbol', 'totalSupply']
+            'dashboard_functions': ['name', 'symbol', 'decimals', 'totalSupply']
         }
 
 
