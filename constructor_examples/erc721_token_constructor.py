@@ -18,7 +18,7 @@ class Constructor(ConstructorInstance):
             "properties": {
                 "name": {
                     "title": "Name of a token",
-                    "description": "Token human-friendly name (3..100 characters, letters, digits and spaces only)",
+                    "description": "Public token human-friendly name (3..100 characters, letters, digits and spaces only).",
                     "type": "string",
                     "minLength": 3,
                     "maxLength": 100,
@@ -27,7 +27,7 @@ class Constructor(ConstructorInstance):
 
                 "symbol": {
                     "title": "Token Symbol",
-                    "description": "Token ticker (2..10 characters, letters and digits only)",
+                    "description": "Token ticker, like BTC or ETH (2..10 characters, letters and digits only).",
                     "type": "string",
                     "minLength": 2,
                     "maxLength": 10,
@@ -44,8 +44,8 @@ class Constructor(ConstructorInstance):
                     "minimum": 1,
                     "maximum": 2**63,
                     "default": 100,
-                    "title": "Max tokens count",
-                    "description": "Max tokens count. Leave blank for unlimited tokens count"
+                    "title": "Maximum tokens count",
+                    "description": "Limit for tokens issuance. Leave blank for unlimited tokens count."
                 },
                 #"premint": {
                 #    "type": "integer",
@@ -58,13 +58,13 @@ class Constructor(ConstructorInstance):
                     "type": "boolean",
                     "default": False,
                     "title": "Is token burnable?",
-                    "description": "Can token holders burn their tokens?"
+                    "description": "If checked, token holders can explicitly burn their tokens by special function."
                 },
                 "is_pausable": {
                     "type": "boolean",
                     "default": False,
                     "title": "Is token pausable?",
-                    "description": "Token owner will be able to pause token functions"
+                    "description": "If checked, token owner can pause all token functions for a while."
                 },
             }
         }
@@ -143,78 +143,183 @@ class Constructor(ConstructorInstance):
 
     def post_construct(self, fields, abi_array):
         function_titles = {
-            'pause': {
-                'title': 'Pause circulation',
-                'description': 'Disable any token transfers and burns. Callable only by token owner.',
+            #
+            # VIEW functions
+            #
+            'name': {
+                'title': 'Token name',
+                'description': 'Name of the token.',
+                'sorting_order': 10,
             },
-            'unpause': {
-                'title': 'Enable circulation',
-                'description': 'Enables token transfers in case they were paused. Callable only by token owner.',
+
+            'symbol': {
+                'title': 'Token ticker',
+                'description': 'Abbreviated name of the token used on exchanges etc.',
+                'sorting_order': 20,
             },
-            'burn': {
-                'title': 'Burn tokens',
-                'description': 'Burns certain token owned by current account.',
+
+            'owner': {
+                'title': 'Owner',
+                'description': 'Address of the token owner.',
+                'sorting_order': 30,
+            },
+
+            'totalSupply': {
+                'title': 'Total supply',
+                'description': 'Number of tokens minted by now.',
+                'sorting_order': 40,
+            },
+
+            'cap': {
+                'title': 'Supply cap',
+                'description': 'Maximum number of tokens which could be minted.',
+                'sorting_order': 50,
+            },
+
+            'mintingFinished': {
+                'title': 'Minting finished',
+                'description': 'If true, no more tokens could be minted.',
+                'sorting_order': 60,
+            },
+
+            'paused': {
+                'title': 'Paused',
+                'description': 'If true, any token transfers are disabled.',
+                'sorting_order': 70,
+            },
+
+            #
+            # ASK functions
+            #
+            'exists': {
+                'title': 'Does ID exist',
+                'description': 'Checks if certain token ID exists',
                 'inputs': [{
                     'title': 'TokenId',
-                    'description': 'Unique identifier of the token.'
-                }]
+                }],
+                'sorting_order': 110,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'file-question'
+                },
             },
-            'mint': {
-                'title': 'Mint new token',
-                'description': 'Creates new token out-of-thin-air and gives it to specified address. Callable only by token owner.',
-                'inputs': [
-                    {
-                        'title': 'Address',
-                        'description': 'Transfer tokens to this address.',
-                    },
-                    {
-                        'title': 'TokenId',
-                    },
-                ]
-            },
-            'mintWithURI': {
-                'title': 'Mint new token with URI',
-                'description': 'Creates new token out-of-thin-air, assignes unique name on it and gives it to specified address. Callable only by token owner.',
-                'inputs': [
-                    {
-                        'title': 'Address',
-                        'description': 'Transfer tokens to this address.',
-                    },
-                    {
-                        'title': 'TokenId',
-                    },
-                    {
-                        'title': 'URI',
-                        'description': 'Unique token name'
-                    },
-                ]
-            },
-            'finishMinting': {
-                'title': 'Finish minting',
-                'description': 'Disables any further token creation via minting. Callable only by token owner.',
-            },
-            'allowance': {
-                'title': 'View allowance',
-                'description': 'View amount of tokens which some token holder allowed to spend by another address.',
+
+            'tokenURI': {
+                'title': 'URI by ID',
+                'description': 'Gets token URI by token ID. URI is a string of arbitrary format, although traditionnaly called URI.',
                 'inputs': [{
-                    'title': 'Address of owner',
-                    'description': 'Address which allowed to spend his tokens.',
-                }, {
-                    'title': 'Address of spender',
-                    'description': 'Address which was allowed to spend tokens.',
-                }]
+                    'title': 'TokenID',
+                }],
+                'sorting_order': 120,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'playlist-check'
+                },
             },
-            'approve': {
-                'title': 'Approve spending',
-                'description': 'Allow your certain token to be spent by specified address.',
+
+            'ownerOf': {
+                'title': 'Owner by ID',
+                'description': 'Gets owner of certain token ID',
                 'inputs': [{
-                    'title': 'Address of spender',
-                    'description': 'Address to allow to spend tokens.',
-                }, {
                     'title': 'TokenId',
-                    'description': 'Unique token identifier',
-                }]
+                }],
+                'sorting_order': 130,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'account-check'
+                },
             },
+
+            'getApproved': {
+                'title': 'Approved by ID',
+                'description': 'Gets the approved address for specific token ID, or zero if no address set. Approved address can dispose of the token.',
+                'inputs': [{
+                    'title': 'TokenId',
+                }],
+                'sorting_order': 140,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'account-multiple-check'
+                },
+            },
+
+            'isApprovedForAll': {
+                'title': 'Is approved for all tokens transfer',
+                'description': 'Tells whether an operator is approved by a given owner. Operator can dispose of all owner\'s tokens .',
+                'inputs': [
+                    {
+                        'title': 'Owner address',
+                    },
+                    {
+                        'title': 'Operator address',
+                    },
+                ],
+                'sorting_order': 190,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'briefcase-check'
+                },
+            },
+
+            'balanceOf': {
+                'title': 'Owner token count',
+                'description': 'Gets number of tokens owned by specific address',
+                'inputs': [{
+                    'title': 'Address',
+                }],
+                'sorting_order': 150,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'counter'
+                },
+            },
+
+            'tokenByIndex': {
+                'title': 'Token ID by index',
+                'description': 'Gets the token ID at a given index of all tokens.',
+                'inputs': [{
+                    'title': 'Index',
+                    'description': 'Index of a token'
+                }],
+                'sorting_order': 160,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'circle-outline'
+                },
+            },
+
+            'tokenOfOwnerByIndex': {
+                'title': 'Token ID of owner by index',
+                'description': 'Gets a token ID at a given index of the tokens list of the specified owner',
+                'inputs': [{
+                    'title': 'Owner address',
+                }, {
+                    'title': 'Index',
+                    'description': 'Index of a token'
+                }],
+                'sorting_order': 170,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'account-circle'
+                },
+            },
+
+            'tokensOfOwner': {
+                'title': 'List token IDs by owner',
+                'description': 'Gets the list of all token IDs of the specific owner',
+                'inputs': [{
+                    'title': 'Owner address',
+                }],
+                'sorting_order': 180,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'format-list-bulleted'
+                },
+            },
+
+            #
+            # WRITE functions
+            #
             'transferFrom': {
                 'title': 'Transfer from',
                 'description': 'Transfers from one account to another. Account which tokens are transferred has to approve this spending.',
@@ -227,10 +332,16 @@ class Constructor(ConstructorInstance):
                 }, {
                     'title': 'TokenId',
                     'description': 'Unique token identifier',
-                }]
+                }],
+                'sorting_order': 210,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'arrow-expand-right'
+                },
             },
+
             'safeTransferFrom': {
-                'title': 'Save Transfer from',
+                'title': 'Save transfer from',
                 'description': 'Safely transfers the ownership of a given token ID to another address. If the target address is a contract, it must onERC721Received method which is called upon a safe transfer.',
                 'inputs': [{
                     'title': 'From address',
@@ -244,146 +355,166 @@ class Constructor(ConstructorInstance):
                 }, {
                     'title': 'Data',
                     'description': 'Bytes data to send along with a safe transfer check',
-                }]
+                }],
+                'sorting_order': 220,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'arrow-expand-right'
+                },
             },
+
             'setTokenURI': {
-                'title': 'Set Token URI',
-                'description': 'Set pretty string URI/name for the given token',
+                'title': 'Set token URI',
+                'description': 'Set some data string for specified token. String can be of arbitrary format, although traditionnaly called URI.',
                 'inputs': [{
                     'title': 'TokenID',
                 }, {
                     'title': 'URI',
-                }]
+                }],
+                'sorting_order': 230,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'playlist-edit'
+                },
             },
-            'tokenURI': {
-                'title': 'Token URI',
-                'description': 'Returns an URI for a given token ID',
+
+            'approve': {
+                'title': 'Approve token transfer',
+                'description': 'Allow your certain token to be transferred by specified "approved" address.',
                 'inputs': [{
-                    'title': 'TokenID',
-                }]
-            },
-            'tokenOfOwnerByIndex': {
-                'title': 'Token Of Owner By Index',
-                'description': 'Gets the token ID at a given index of the tokens list of the requested owner',
-                'inputs': [{
-                    'title': 'Owner address',
+                    'title': 'Address to approve',
+                    'description': 'Address to allow to transfer token.',
                 }, {
-                    'title': 'Index',
-                    'description': 'Index number to be accessed of the requested tokens list'
-                }]
-            },
-            'tokensOfOwner': {
-                'title': 'List of tokens of given Owner',
-                'description': 'Gets the list of token IDs of the requested owner',
-                'inputs': [{
-                    'title': 'Owner address',
-                }]
-            },
-            'tokenByIndex': {
-                'title': 'Token By Index',
-                'description': 'Gets the token ID at a given index of all the tokens in this contract',
-                'inputs': [{
-                    'title': 'Index',
-                    'description': 'Index number to be accessed of the requested tokens list'
-                }]
-            },
-            'name': {
-                'title': 'Token name',
-                'description': 'Human-friendly name of the token.',
+                    'title': 'TokenId',
+                    'description': 'Unique identifier of the token.',
+                }],
+                'sorting_order': 240,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'account-multiple-plus'
+                },
             },
 
-            'symbol': {
-                'title': 'Token ticker',
-                'description': 'Abbreviated name of the token used on exchanges etc.',
-            },
-
-            'balanceOf': {
-                'title': 'Get balance',
-                'description': 'Gets number of tokens owned by any address',
-                'inputs': [{
-                    'title': 'Address',
-                }]
-            },
-            'ownerOf': {
-                'title': 'Get owner',
-                'description': 'Gets owner of certain token',
-                'inputs': [{
-                    'title': 'TokenId',
-                }]
-            },
-            'exists': {
-                'title': 'Exists',
-                'description': 'Checks if certain token exists',
-                'inputs': [{
-                    'title': 'TokenId',
-                }]
-            },
-            'getApproved': {
-                'title': 'Get Approved',
-                'description': 'Gets the approved address for a token ID, or zero if no address set',
-                'inputs': [{
-                    'title': 'TokenId',
-                }]
-            },
             'setApprovalForAll': {
-                'title': 'Set Approval For All',
-                'description': 'Sets or unsets the approval of a given operator.',
+                'title': 'Approve all tokens transfer',
+                'description': 'Allow all your tokens to be transferred by specified "operator" address.',
                 'inputs': [{
                     'title': 'Operator',
                     'description': 'An operator will be allowed to transfer all tokens of the sender on his behalf.',
-                }]
+                }],
+                'sorting_order': 250,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'briefcase'
+                },
             },
-            'isApprovedForAll': {
-                'title': 'Is Approved For All',
-                'description': 'Tells whether an operator is approved by a given owner',
+
+            'burn': {
+                'title': 'Burn token',
+                'description': 'Burns certain token, which should be owned by your current account.',
+                'inputs': [{
+                    'title': 'TokenId',
+                    'description': 'Unique identifier of the token.'
+                }],
+                'sorting_order': 260,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'fire'
+                },
+            },
+
+            'mint': {
+                'title': 'Mint new token',
+                'description': 'Callable only by contract owner. Creates new token "out-of-thin-air" and gives it to specified address.',
                 'inputs': [
                     {
-                        'title': 'Owner address',
+                        'title': 'Address',
+                        'description': 'Transfer new token to this address.',
                     },
                     {
-                        'title': 'Operator address',
+                        'title': 'TokenId',
+                        'description': 'Unique identifier of the new token.',
                     },
-                ]
+                ],
+                'sorting_order': 270,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'coins'
+                },
             },
-            'totalSupply': {
-                'title': 'Total supply',
-                'description': 'Current total amount of the tokens.',
+
+            'mintWithURI': {
+                'title': 'Mint new token with URI',
+                'description': 'Callable only by contract owner. Creates new token "out-of-thin-air", assignes it specified URI and gives it to specified address.',
+                'inputs': [
+                    {
+                        'title': 'Address',
+                        'description': 'Transfer new token to this address.',
+                    },
+                    {
+                        'title': 'TokenId',
+                    },
+                    {
+                        'title': 'URI',
+                        'description': 'Unique token name'
+                    },
+                ],
+                'sorting_order': 280,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'coins'
+                },
+            },
+
+            'finishMinting': {
+                'title': 'Finish minting',
+                'description': 'Callable only by contract owner. Disables any further token creation via minting. Remember that this function is irrevokable.',
+                'sorting_order': 290,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'stop'
+                },
+            },
+
+            'pause': {
+                'title': 'Pause circulation',
+                'description': 'Callable only by contract owner. Disable any token transfers and burns. Can be unpaused by "unpause" function.',
+                'sorting_order': 300,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'pause'
+                },
+            },
+
+            'unpause': {
+                'title': 'Unpause circulation',
+                'description': 'Callable only by contract owner. Enables token transfers and burns in case they were paused.',
+                'sorting_order': 310,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'play'
+                },
             },
 
             'transferOwnership': {
                 'title': 'Transfer ownership',
-                'description': 'Transfers ownership of the token to another address. Ownership rights are required to perform some administrative operations.',
+                'description': 'Callable only by contract owner. Transfers ownership to another address. Ownership rights are required to perform some administrative operations.',
                 'inputs': [{
                     'title': 'New owner address',
-                    'description': 'Address which\'ll receive ownership rights.',
-                }]
-            },
-
-            'mintingFinished': {
-                'title': 'Minting finished',
-                'description': 'If true no more tokens could be created.',
-            },
-
-            'cap': {
-                'title': 'Maximum tokens',
-                'description': 'Maximum number of tokens which could be created. Return value is specified in the smallest units of the token.',
-            },
-
-            'paused': {
-                'title': 'Paused',
-                'description': 'If true any token transfers are disabled.',
-            },
-
-            'owner': {
-                'title': 'Owner',
-                'description': 'Address of the token owner.',
+                    'description': 'Address which will receive ownership rights.',
+                }],
+                'sorting_order': 320,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'account-switch'
+                },
             }
         }
 
         return {
             "result": "success",
             'function_specs': function_titles,
-            'dashboard_functions': ['symbol', 'totalSupply']
+            'dashboard_functions': ['name', 'symbol', 'totalSupply', 'cap']
         }
 
     # language=Solidity
@@ -1023,8 +1154,8 @@ contract ERC721Token is ERC721, ERC721BasicToken {
         allTokensIndex[_tokenId] = allTokens.length;
         allTokens.push(_tokenId);
     }
-    
-    
+
+
     /**
      * @dev Internal function to burn a specific token
      * @dev Reverts if the token does not exist
@@ -1074,7 +1205,7 @@ contract MintableToken is ERC721Token, Ownable {
         require(!mintingFinished);
         _;
     }
-    
+
     function mint(address _to, uint256 _tokenId) public onlyOwner canMint {
         _mint(_to, _tokenId);
     }
@@ -1092,7 +1223,7 @@ contract MintableToken is ERC721Token, Ownable {
         mintingFinished = true;
         MintFinished();
         return true;
-    }    
+    }
 }
 
 /**
@@ -1213,8 +1344,8 @@ contract Token is ERC721Token %parents_code% {
         public
         payable
         ERC721Token('%name%', '%symbol%')
-        %constructors_code% 
-    { 
+        %constructors_code%
+    {
         %constructor_inner_code%
         %payment_code%
     }
