@@ -1,16 +1,20 @@
-
 from smartz.api.constructor_engine import ConstructorInstance
-from smartz.eth.contracts import merge_function_titles2specs, make_generic_function_spec
+
 
 # Constructor name:
 # Crowdfunding for ERC20 token
 
 # Constructor description:
-# Easily raise Ether funds for your startup in exchange for your ERC20 tokens! Just share the contract instance link to your potential contributors.
-
-# Price: 0.19 ETH
+# Easily raise Ether funds for your startup in exchange for your ERC20 tokenss. Just deploy and share the dapp link to your potential contributors.
 
 class Constructor(ConstructorInstance):
+
+    def get_version(self):
+        return {
+            "result": "success",
+            "blockchain": "ethereum",
+            "version": 2
+        }
 
     def get_params(self):
         json_schema = {
@@ -22,7 +26,7 @@ class Constructor(ConstructorInstance):
             "properties": {
                 "name": {
                     "title": "Public name of the token",
-                    "description": "Usually coincides with a project name, 3 to 100 symbols",
+                    "description": "Usually coincides with a project name, 3 to 100 symbols.",
                     "type": "string",
                     "minLength": 3,
                     "maxLength": 100,
@@ -31,7 +35,7 @@ class Constructor(ConstructorInstance):
 
                 "symbol": {
                     "title": "Token ticker",
-                    "description": "Public short designation of your token, used by exchanges and not only. Check for matches with existing tokens. 2 to 10 characters, letters and digits only",
+                    "description": "Public short designation of your token, used by exchanges and not only. 2 to 10 characters, letters and digits only.",
                     "type": "string",
                     "minLength": 2,
                     "maxLength": 10,
@@ -42,31 +46,31 @@ class Constructor(ConstructorInstance):
                     "type": "boolean",
                     "default": False,
                     "title": "Is token burnable?",
-                    "description": "If checked, token holders will be able to destroy own tokens by burning them"
+                    "description": "If checked, token holders will be able to explicitly destroy their own tokens by burning them."
                 },
 
                 "date_start": {
-                    "title": "Crowdfunding start time",
-                    "description": "Pick the day and UTC time when your crowdfunding campaing will start. Until this time all Ether sent to contract will return. Actual start time may bе a few minutes late. Should be in future",
+                    "title": "Campaign start time",
+                    "description": "Pick the UTC date and time when your crowdfunding campaing will start. Until this time all Ether sent to contract will return. Actual start time may bе a few minutes late. Should be in future.",
                     "$ref": "#/definitions/unixTime"
                 },
                 "date_end": {
-                    "title": "Crowdfunding end time",
-                    "description": "Pick the day and UTC time when your crowdfunding campaing will start. Until this time all Ether sent to contract will return. Actual end time may bе a few minutes late. Should be in future and after the start time",
+                    "title": "Campaign end time",
+                    "description": "Pick the UTC date and time when your crowdfunding campaing will end. After this time all Ether sent to contract will return. Actual end time may bе a few minutes late. Should be in future and after the start time.",
                     "$ref": "#/definitions/unixTime"
                 },
 
                 "rate": {
-                    "title": "Ether-token exchange rate",
-                    "description": "How many tokens will your donators get for each donaed Ether. From 1 to 1 million",
+                    "title": "Tokens per contributed Ether",
+                    "description": "How many tokens will your contributors get for each Ether. Should be in range from 1 to 1 million.",
                     "type": "integer",
                     "minimum": 1,
                     "maximum": 1000000
                 },
 
                 "hard_cap": {
-                    "title": "Hard cap",
-                    "description": "Maximum amount of funds to raise. After this amount collected all Ether sent to contract will return. From 1 to 1 billion",
+                    "title": "Hard cap in Ether",
+                    "description": "Maximum amount of Ether to be raised. After this amount collected all Ether sent to contract will return. Should be in range from 1 to 1 billion.",
                     "type": "integer",
                     "minimum": 1,
                     "maximum": 1000000000
@@ -74,7 +78,7 @@ class Constructor(ConstructorInstance):
 
                 "funds_address": {
                     "title": "Ether vault address",
-                    "description": "All collected Ether will be transferred to this address. We strongly recommend a secure multisignature wallet contract",
+                    "description": "All received Ether will be instantly transferred to this address. We strongly recommend it to be a secure multisignature wallet contract.",
                     "$ref": "#/definitions/address"
                 }
             }
@@ -126,18 +130,9 @@ class Constructor(ConstructorInstance):
     def post_construct(self, fields, abi_array):
 
         function_titles = {
-            'token': {
-                'title': 'Token address',
-                'description': 'Address of the crowdfunding token. This address should be added to the wallets to see your tokens balance and manage them.',
-                'sorting_order': 10,
-            },
-
-            'funds_address': {
-                'title': 'Ether vault address',
-                'description': 'Address where all coming Ether is transferred.',
-                'sorting_order': 20,
-            },
-
+            #
+            # VIEW functions
+            #
             'date_start': {
                 'title': 'Start time',
                 'description': 'Crowdfunding campaing start time (in your timezone)',
@@ -145,7 +140,7 @@ class Constructor(ConstructorInstance):
                 'ui:widget_options': {
                     'format': "yyyy.mm.dd HH:MM:ss"
                 },
-                'sorting_order': 30,
+                'sorting_order': 10,
             },
 
             'date_end': {
@@ -155,64 +150,85 @@ class Constructor(ConstructorInstance):
                 'ui:widget_options': {
                     'format': "yyyy.mm.dd HH:MM:ss"
                 },
-                'sorting_order': 40,
+                'sorting_order': 20,
             },
 
             'daysRemaining': {
                 'title': 'Full days remaining',
                 'description': 'Full days before the end of crowdfunding campaing.',
+                'sorting_order': 30,
+            },
+
+            'collected': {
+                'title': 'Collected Ether',
+                'description': 'Collected by now amount of Ether.',
+                'ui:widget': 'ethCount',
+                'ui:widget_options': {
+                    'show_currency': 'USD'
+                },
+                'sorting_order': 40,
+            },
+
+            'hard_cap': {
+                'title': 'Hard cap',
+                'description': 'Total Ether amount to be accepted by the crowdfunding contract.',
+                'ui:widget': 'ethCount',
+                'ui:widget_options': {
+                    'show_currency': 'USD'
+                },
                 'sorting_order': 50,
             },
 
             'rate': {
-                'title': 'Ether-token exchange rate',
-                'description': 'How many tokens donators get for each donaed Ether.',
+                'title': 'Tokens per contributed Ether',
+                'description': 'How many tokens donators get for each donated Ether.',
                 'sorting_order': 60,
             },
 
             'totalTokens': {
                 'title': 'Total tokens issued',
-                'description': 'Current total amount of the token. Specified in the smallest units of the token.',
+                'description': 'Total supply of the token by now. Specified in the smallest units of the token (18 decimals).',
                 'sorting_order': 70,
             },
 
-            'collected': {
-                'title': 'Collected Ether',
-                'description': 'Currently collected amount of Ether.',
-                'ui:widget': 'ethCount',
-                'ui:widget_options': {
-                    'show_currency': 'USD'
-                },
+            'token': {
+                'title': 'Token address',
+                'description': 'Address of the crowdfunding token. This address should be added to the wallets to see your tokens balance and manage them.',
                 'sorting_order': 80,
             },
 
-            'hard_cap': {
-                'title': 'Hard cap',
-                'description': 'Maximum Ether to be accepted by the crowdfunding contract.',
-                'ui:widget': 'ethCount',
-                'ui:widget_options': {
-                    'show_currency': 'USD'
-                },
+            'funds_address': {
+                'title': 'Ether vault address',
+                'description': 'Address where all incoming Ether is transferred.',
                 'sorting_order': 90,
             },
 
+            #
+            # ASK functions
+            # (empty)
+
+            #
+            # WRITE functions
+            #
             '': {
                 'title': 'Contribute',
                 'description': 'Send Ether to crowdfunding campaing.',
                 'payable_details': {
                     'title': 'Ether amount',
-                    'description': 'This ether amount will be sent.'
+                    'description': 'This ether amount you will contribute to crowdfunding campaing.'
                 },
                 'sorting_order': 100,
+                'icon': {
+                    'pack': 'materialdesignicons',
+                    'name': 'currency-eth'
+                },
             },
-
-
         }
 
         return {
             "result": "success",
-            'function_specs': merge_function_titles2specs(make_generic_function_spec(abi_array), function_titles),
-            'dashboard_functions': ['collected', 'totalTokens', 'daysRemaining']
+            'function_specs': function_titles,
+            'dashboard_functions': ['daysRemaining', 'collected', 'hard_cap', 'totalTokens']
         }
 
 
