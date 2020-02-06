@@ -21,7 +21,7 @@
         raise NotImplementedError()
 ```
 
-An important thing to mention for eos contract developers: make sure that ***"contract_name"*** key, which is returned by `construct` method, has the same ***name*** value as your contract name. 
+An important thing to mention for eos contract developers: make sure that ***"contract_name"***, which is returned by `construct` method, has the same name as your contract name. 
 For example, we have "hello world" contract with custom message, provided by user in smartz deploy constructor page:
 ```cpp
   #include <eosio/eosio.hpp>
