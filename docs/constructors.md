@@ -21,6 +21,38 @@
         raise NotImplementedError()
 ```
 
+An important thing to mention for eos contract developers: make sure that ***"contract_name"*** key, which is returned by `construct` method, has the same ***name*** value as your contract name. 
+For example, we have "hello world" contract with custom message, provided by user in smartz deploy constructor page:
+```cpp
+  #include <eosio/eosio.hpp>
+  #include <eosio/name.hpp>
+
+  static constexpr uint64_t token_symbol = TST;
+
+  // contract name is "hello"
+  class [[eosio::contract]] hello : public eosio::contract {
+     public:
+        using eosio::contract::contract;
+
+        [[eosio::action]]
+        void hi() {
+           eosio::print_f("%this_param_is_filled_in_by_user%");
+        }
+  };
+```
+This contract is stored as a string class attribute (`self.__class__._TEMPLATE: str`) in an implementation of `ConstructorInstance` class.
+So for the "hello world" contract our `ConstructorInstance.construct` method implementation must have the same ***contract_name*** value in its return as "hello world" contract has:
+```python
+  def construct(self):
+	source = self.__class__._TEMPLATE \
+            .replace('%this_param_is_filled_in_by_user%', fields['this_param_is_filled_in_by_user'])
+        
+        return {
+            "result": "success",
+            "source": source,
+            "contract_name": "hello" # The same name as in "hello world" contract
+        }
+```
 
 ## version 1
 
